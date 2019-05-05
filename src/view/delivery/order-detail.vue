@@ -61,11 +61,11 @@
                   <Col span="8" style="margin-right: 10px">
                     <Input number clearable v-model="item.num"></Input>
                   </Col>
-                  <Button size="small" type="error" shape="circle" icon="md-close" @click="handleRemove(index)"></Button>
+                  <Button size="small" type="text" shape="circle" icon="md-close" style="color: red;" @click="handleRemove(index)"></Button>
                 </FormItem>
               </Row>
               <Row>
-                <Col span="6" offset="6">
+                <Col span="4">
                   <Button type="dashed" long @click="changeAddShow" icon="md-add"></Button>
                 </Col>
               </Row>
@@ -157,22 +157,27 @@ export default {
       ],
       goodsList: [
         {
+          id: 0,
           name: '碗',
           num: '1000'
         },
         {
+          id: 1,
           name: '杯子',
           num: '1200'
         },
         {
+          id: 2,
           name: '勺',
           num: '1500'
         },
         {
+          id: 3,
           name: '盘子',
           num: '1000'
         },
         {
+          id: 4,
           name: '筷子',
           num: '800'
         }

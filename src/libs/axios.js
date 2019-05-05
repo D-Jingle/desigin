@@ -1,5 +1,6 @@
 import axios from 'axios'
 import store from '@/store'
+import { Message } from 'iview'
 // import { Spin } from 'iview'
 const addErrorLog = errorInfo => {
   const { statusText, status, request: { responseURL } } = errorInfo
@@ -46,6 +47,9 @@ class HttpRequest {
     })
     // 响应拦截
     instance.interceptors.response.use(res => {
+      if (res.data.code !== 0) {
+        Message.error(res.data.message)
+      }
       this.destroy(url)
       const { data, status } = res
       return { data, status }

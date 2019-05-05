@@ -6,15 +6,15 @@
       <Button type="primary">查询</Button>
       <Button type="primary" @click="addShow = true" style="float: right">增加车辆</Button>
     </Row>
-    <Modal v-model="editShow"
+    <Modal v-model="changeShow"
            title="编辑车辆信息"
-           @on-ok="handleEditCar">
+           @on-ok="changeCar">
       <Row style="margin-bottom: 5px">
         <Col span="4">
           <span>车辆名称:</span>
         </Col>
         <Col span="10">
-          <Input v-model="editCarName" clearable style="width: 200px" />
+          <Input v-model="change.name" clearable style="width: 200px" />
         </Col>
       </Row>
       <Row style="margin-bottom: 5px">
@@ -22,8 +22,8 @@
           <span>车辆状态:</span>
         </Col>
         <Col span="10">
-          <Select v-model="editCarStatus" style="width:200px">
-            <Option v-for="item in carStatusList" :value="item.status" :key="item.id">{{ item.status }}</Option>
+          <Select v-model="change.status" style="width:200px">
+            <Option v-for="item in carStatusList" :value="item.id" :key="item.id">{{ item.status }}</Option>
           </Select>
         </Col>
       </Row>
@@ -32,75 +32,84 @@
           <span>车牌号：</span>
         </Col>
         <Col span="10">
-          <Input v-model="editCarId" clearable style="width: 200px" />
+          <Input v-model="change.number" clearable style="width: 200px" />
         </Col>
       </Row>
     </Modal>
 
     <Modal v-model="addShow"
            title="添加车辆信息"
-           @on-ok="handleAddCar">
-      <Row style="margin-bottom: 5px">
+           @on-ok="addCar">
+      <Row>
         <Col span="4">
           <span>车辆名称:</span>
         </Col>
         <Col span="10">
-          <Input v-model="addCarName" clearable style="width: 200px" />
+          <Input v-model="add.name" clearable style="width: 200px" />
         </Col>
       </Row>
       <Row style="margin-bottom: 5px">
         <Col span="4">
-          <span>车辆状态:</span>
+          <span>车牌号:</span>
         </Col>
         <Col span="10">
-          <Select v-model="addCarStatus" style="width:200px">
-            <Option v-for="item in carStatusList" :value="item.status" :key="item.id">{{ item.status }}</Option>
-          </Select>
-        </Col>
-      </Row>
-      <Row style="margin-bottom: 5px">
-        <Col span="4">
-          <span>车牌号：</span>
-        </Col>
-        <Col span="10">
-          <Input v-model="addCarId" clearable style="width: 200px" />
+          <Input v-model="add.number" clearable style="width: 200px" />
         </Col>
       </Row>
     </Modal>
-
     <Divider>车辆信息</Divider>
     <Table :columns="columns1" :data="data1"></Table>
   </div>
 </template>
 
 <script>
+import { getCarApi, addCarApi, deleteCarApi, changeCarApi } from '@/api/car'
 export default {
   name: 'car-info',
   data () {
     return {
+      add: {
+        name: '',
+        number: ''
+      },
+      change: {
+        systemId: null,
+        name: '',
+        number: '',
+        status: '点击选择'
+      },
       searchCarId: '',
-      editStatus: '点击选择',
-      editCarId: '',
-      addCarId: '',
-      addStatus: '点击选择',
-      editCarName: '',
-      editCarStatus: '',
-      addCarName: '',
-      addCarStatus: '',
       addShow: false,
-      editShow: false,
+      changeShow: false,
       columns1: [
+        {
+          title: '车辆编号',
+          key: 'systemId'
+        },
         {
           title: '车辆名称',
           key: 'name'
         },
         {
           title: '车辆状态',
-          key: 'status'
+          key: 'status',
+          render: (h, params) => {
+            let status = '无状态'
+            if (params.row.status === 0) {
+              status = '可使用'
+            } else if (params.row.status === 1) {
+              status = '配送中'
+            }
+            return h('span', {
+              domProps: {
+                innerText: status
+              }
+            })
+          }
         },
         {
           title: '车牌号',
-          key: 'carId'
+          key: 'number'
         },
         {
           title: '操作',
@@ -112,7 +121,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.handleDeleteCar()
+                    this.handleDeleteCar(params.row.systemId)
                   }
                 }
               }),
@@ -125,7 +134,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.changeEditCarStatus(params.row.name, params.row.status)
+                    this.changeEditCarStatus(params.row.systemId, params.row.name, params.row.number, params.row.status)
                   }
                 }
               })
@@ -133,32 +142,11 @@ export default {
           }
         }
       ],
-      data1: [
-        {
-          name: '布加迪',
-          status: '可使用',
-          carId: '黑A12345'
-        },
-        {
-          name: '兰博基尼',
-          status: '配送中',
-          carId: '黑A12325'
-        },
-        {
-          name: '法拉利',
-          status: '配送中',
-          carId: '黑A42345'
-        },
-        {
-          name: '劳斯莱斯',
-          status: '可使用',
-          carId: '黑A12348'
-        }
-      ],
+      data1: [],
       carStatusList: [
         {
           id: 0,
-          status: '可适用'
+          status: '可使用'
         },
         {
           id: 1,
@@ -167,32 +155,62 @@ export default {
       ]
     }
   },
+  created () {
+    this.getCar()
+  },
   methods: {
-    handleChangeEditStatus (name) {
-      this.editStatus = name
+    deleteCar (systemId) {
+      deleteCarApi(systemId).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.success('删除成功')
+          this.getCar()
+        }
+      })
     },
-    handleChangeAddStatus (name) {
-      this.addStatus = name
+    changeCar () {
+      changeCarApi(this.change).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.success('修改成功')
+          this.getCar()
+        }
+      }).catch(err => {
+        this.$Message.error('请求失败')
+        console.log(err)
+      })
     },
-    changeEditCarStatus (name, status) {
-      this.editCarName = name
-      this.editCarStatus = status
-      this.editShow = true
+    getCar () {
+      getCarApi(0).then(res => {
+        if (res.data.code === 0) {
+          this.data1 = res.data.data
+        }
+      }).catch(err => {
+        this.$Message.error('请求失败')
+        console.log(err)
+      })
     },
-    handleEditCar () {
-      this.$Message.success('更改成功')
+    changeEditCarStatus (systemId, name, number, status) {
+      this.change = { systemId, name, number, status }
+      this.changeShow = true
     },
-    handleDeleteCar () {
+    handleDeleteCar (systemId) {
       this.$Modal.confirm({
         title: '提示',
         content: '确定删除该车辆信息？',
         onOk: () => {
-          this.$Message.success('删除成功')
+          this.deleteCar(systemId)
         }
       })
     },
-    handleAddCar () {
-      this.$Message.success('添加成功')
+    addCar () {
+      addCarApi(this.add).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.success('添加成功')
+          this.getCar()
+        }
+      }).catch(err => {
+        this.$Message.error('请求失败')
+        console.log(err)
+      })
     }
   }
 }
