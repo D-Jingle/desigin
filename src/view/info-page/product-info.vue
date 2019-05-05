@@ -130,7 +130,7 @@ export default {
       })
     },
     searchProductById () {
-      if (this.searchProductId === '') {
+      if (!this.searchProductId) {
         this.$Message.error('请输入要查询的编号！')
         return
       }

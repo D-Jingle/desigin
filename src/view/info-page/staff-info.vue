@@ -2,32 +2,38 @@
     <div>
       <Row style="margin-bottom: 5px">
         搜索：
-        <Input v-model="searchStaffId" placeholder="请输入员工号" style="width: 150px;"/>&nbsp;
-        <Button type="primary">查询</Button>
+        <Input v-model="searchEmployeeId" placeholder="请输入员工号" style="width: 150px;"/>&nbsp;
+        <Button type="primary" @click="searchEmployeeById">查询</Button>
         <Button type="primary" @click="addShow = true" style="float: right">增加员工</Button>
       </Row>
       <Modal v-model="editShow"
              title="编辑员工信息"
              @on-ok="handleEditStaff">
-        姓名：<Input v-model="editStaffName" clearable style="width: 200px" />
+        姓名：<Input v-model="change.name" clearable style="width: 200px" />
         <br/>
-        性别：<Input v-model="editStaffSex" clearable style="width: 200px" />
+        性别：<Input v-model="change.sex" clearable style="width: 200px" />
         <br/>
-        职位：<Input v-model="editStaffPosition" clearable style="width: 200px" />
+        职位：<Input v-model="change.position" clearable style="width: 200px" />
         <br/>
-        备注：<Input v-model="editStaffRemark" clearable style="width: 200px" />
+        备注：<Input v-model="change.comment" clearable style="width: 200px" />
       </Modal>
 
       <Modal v-model="addShow"
              title="添加员工信息"
-             @on-ok="handleAddStaff">
-        姓名：<Input v-model="addStaffName" clearable style="width: 200px" />
+             @on-ok="addEmployee">
+        姓名：
+        <Input v-model="add.name" clearable style="width: 200px" />
         <br>
-        性别：<Input v-model="addStaffSex" clearable style="width: 200px" />
+        性别：
+        <Select v-model="add.sex" style="width:200px">
+          <Option v-for="item in sexList" :value="item" :key="item">{{ item }}</Option>
+        </Select>
         <br/>
-        职位：<Input v-model="addStaffPosition" clearable style="width: 200px" />
+        职位：
+        <Input v-model="add.position" clearable style="width: 200px" />
         <br/>
-        备注：<Input v-model="addStaffRemark" clearable style="width: 200px" />
+        备注：
+        <Input v-model="add.comment" clearable style="width: 200px" />
       </Modal>
       <Divider>员工信息</Divider>
       <Table :columns="columns1" :data="data1"></Table>
@@ -35,25 +41,31 @@
 </template>
 
 <script>
+import { getEmployeeApi, addEmployeeApi, deleteEmployeeApi, changeEmployeeApi } from '@/api/staff'
 export default {
   name: 'staff-info',
   data () {
     return {
-      searchStaffId: '',
-      editStaffName: '',
-      editStaffSex: '',
-      editStaffPosition: '',
-      editStaffRemark: '',
-      addStaffName: '',
-      addStaffSex: '',
-      addStaffPosition: '',
-      addStaffRemark: '',
+      change: {
+        id: Number,
+        name: '',
+        sex: '',
+        position: '',
+        comment: ''
+      },
+      add: {
+        name: '',
+        sex: '',
+        position: '',
+        comment: ''
+      },
+      searchEmployeeId: '',
       addShow: false,
       editShow: false,
       columns1: [
         {
           title: '工号',
-          key: 'staffId'
+          key: 'systemId'
         },
         {
           title: '姓名',
@@ -69,7 +81,7 @@ export default {
         },
         {
           title: '备注',
-          key: 'remark'
+          key: 'comment'
         },
         {
           title: '操作',
@@ -81,7 +93,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.handleDeleteStaff()
+                    this.handleDeleteStaff(params.row.systemId)
                   }
                 }
               }),
@@ -94,7 +106,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.changeEditStaffStatus(params.row.name, params.row.sex, params.row.position, params.row.remark)
+                    this.changeEditStaffStatus(params.row.name, params.row.sex, params.row.position, params.row.comment)
                   }
                 }
               })
@@ -102,66 +114,85 @@ export default {
           }
         }
       ],
-      data1: [
-        {
-          staffId: '0001',
-          name: '白素贞',
-          sex: '女',
-          position: '白蛇',
-          remark: '青城山下白素贞'
-        },
-        {
-          staffId: '0001',
-          name: '许仙',
-          sex: '男',
-          position: '凡人',
-          remark: '保和堂大夫'
-        },
-        {
-          staffId: '0001',
-          name: '小青',
-          sex: '女',
-          position: '青蛇',
-          remark: '白素贞的妹妹'
-        },
-        {
-          staffId: '0001',
-          name: '法海',
-          sex: '男',
-          position: '和尚',
-          remark: '一心想收妖'
-        }
-      ]
+      data1: [],
+      sexList: ['男', '女']
     }
   },
+  created () {
+    this.getEmployee()
+  },
   methods: {
-    changeEditStaffStatus (name, sex, position, remark) {
-      this.editStaffName = name
-      this.editStaffSex = sex
-      this.editStaffPosition = position
-      this.editStaffRemark = remark
+    getEmployee () {
+      getEmployeeApi(0).then(res => {
+        if (res.data.code === 0) {
+          this.data1 = res.data.data
+        }
+      }).catch(err => {
+        this.$Message.error('请求失败')
+        console.log(err)
+      })
+    },
+    searchEmployeeById () {
+      if (!this.searchEmployeeId) {
+        this.$Message.warning('请输入要查询的编号')
+        return
+      }
+      getEmployeeApi(this.searchEmployeeId).then(res => {
+        if (res.data.code === 0) {
+          this.data1 = res.data.data
+        }
+      }).catch(err => {
+        this.$Message.error('请求失败')
+        console.log(err)
+      })
+    },
+    addEmployee () {
+      addEmployeeApi(this.add).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.success('添加成功')
+          this.getEmployee()
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.error('请求失败')
+      })
+    },
+    deleteEmployee (id) {
+      deleteEmployeeApi(id).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.success('删除成功')
+          this.getEmployee()
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.error('请求失败')
+      })
+    },
+    changeEmployee () {
+      changeEmployeeApi(this.change).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.success('修改成功')
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.error('请求失败')
+      })
+    },
+    changeEditStaffStatus (name, sex, position, comment) {
+      this.change = { name, sex, position, comment }
       this.editShow = true
     },
     handleEditStaff () {
-      this.$Modal.confirm({
-        title: '提示',
-        content: '确定更改信息？',
-        onOk: () => {
-          this.$Message.success('更改成功')
-        }
-      })
+      this.changeEmployee()
     },
-    handleDeleteStaff () {
+    handleDeleteStaff (id) {
       this.$Modal.confirm({
         title: '提示',
         content: '确定删除该员工信息？',
         onOk: () => {
-          this.$Message.success('删除成功')
+          this.deleteEmployee(id)
         }
       })
-    },
-    handleAddStaff () {
-      this.$Message.success('添加成功')
     }
   }
 }

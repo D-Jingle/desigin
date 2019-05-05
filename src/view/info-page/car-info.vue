@@ -3,7 +3,7 @@
     <Row style="margin-bottom: 5px">
       搜索：
       <Input v-model="searchCarId" placeholder="请输入客户号" style="width: 150px;"/>&nbsp;
-      <Button type="primary">查询</Button>
+      <Button type="primary" @click="searchCarById">查询</Button>
       <Button type="primary" @click="addShow = true" style="float: right">增加车辆</Button>
     </Row>
     <Modal v-model="changeShow"
@@ -73,7 +73,7 @@ export default {
         number: ''
       },
       change: {
-        systemId: null,
+        systemId: '',
         name: '',
         number: '',
         status: '点击选择'
@@ -180,6 +180,20 @@ export default {
     },
     getCar () {
       getCarApi(0).then(res => {
+        if (res.data.code === 0) {
+          this.data1 = res.data.data
+        }
+      }).catch(err => {
+        this.$Message.error('请求失败')
+        console.log(err)
+      })
+    },
+    searchCarById () {
+      if (!this.searchCarId) {
+        this.$Message.warning('请输入要查询的编号')
+        return
+      }
+      getCarApi(this.searchCarId).then(res => {
         if (res.data.code === 0) {
           this.data1 = res.data.data
         }
