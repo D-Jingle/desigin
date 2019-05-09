@@ -34,7 +34,7 @@ export const changeCarApi = ({ systemId, name, number, status }) => {
     status
   }
   return axios.request({
-    url: '/car/' + systemId,
+    url: '/car',
     method: 'put',
     data
   })

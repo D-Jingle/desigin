@@ -12,7 +12,7 @@
              @on-ok="handleChangeProduct">
         名称：<Input v-model="change.name" clearable style="width: 200px" />
         <br/>
-        数量：<Input v-model="change.count" clearable style="width: 200px" />
+        数量：<Input v-model="change.count" number clearable style="width: 200px" />
       </Modal>
 
       <Modal v-model="addShow"
@@ -20,10 +20,10 @@
              @on-ok="handleAddProduct">
         名称：<Input v-model="add.name" clearable style="width: 200px" />
         <br/>
-        数量：<Input v-model="add.count" clearable style="width: 200px" />
+        数量：<Input v-model="add.count" number clearable style="width: 200px" />
       </Modal>
       <Divider>产品信息</Divider>
-      <Table :columns="columns1" :data="productData"></Table>
+      <Table :loading="tableLoading" :columns="columns1" :data="productData"></Table>
     </div>
 </template>
 
@@ -33,6 +33,8 @@ export default {
   name: 'product-info',
   data () {
     return {
+      btnLoading: false,
+      tableLoading: false,
       change: {
         systemId: null,
         name: '',
@@ -42,7 +44,7 @@ export default {
         name: '',
         count: null
       },
-      searchProductId: '',
+      searchProductId: null,
       addShow: false,
       changeShow: false,
       columns1: [
@@ -81,7 +83,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.changeChangeProductStatus(params.row.id, params.row.name, params.row.count)
+                    this.changeChangeProductStatus(params.row.systemId, params.row.name, params.row.count)
                   }
                 }
               })
@@ -119,74 +121,113 @@ export default {
   methods: {
     // 获取产品信息
     getProduct () {
+      this.tableLoading = true
       getProductApi(0).then(res => {
         let response = res.data
         if (response.code === 0) {
           this.productData = response.data
+          this.tableLoading = false
         }
       }).catch(err => {
         console.log(err)
+        this.tableLoading = false
         this.$Message.error('请求失败')
       })
     },
     searchProductById () {
-      if (!this.searchProductId) {
+      if (this.searchProductId === null) {
         this.$Message.error('请输入要查询的编号！')
         return
       }
+      console.log(typeof this.searchProductId)
+      if (typeof this.searchProductId !== 'number') {
+        this.$Message.error('请输入数字')
+        this.searchProductId = null
+        return
+      }
+      this.tableLoading = true
       getProductApi(this.searchProductId).then(res => {
         let response = res.data
-        if (response.code === 0) this.productData = response.data
+        if (response.code === 0) {
+          this.productData = response.data
+          this.tableLoading = false
+        }
         this.searchProductId = ''
       }).catch(err => {
         console.log(err)
+        this.tableLoading = false
         this.$Message.error('请求失败')
       })
     },
     // 删除产品信息
     deleteProduct (systemId) {
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
       deleteProductApi(systemId).then(res => {
         let response = res.data
         if (response.code === 0) {
+          this.$Message.destroy()
           this.$Message.success('删除成功')
           this.getProduct()
         }
       }).catch(err => {
         console.log(err)
+        this.$Message.destroy()
         this.$Message.error('请求失败')
       })
     },
     // 更改产品信息
     changeProject () {
-      console.log(this.change)
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
       changeProjectApi(this.change).then(res => {
         let response = res.data
         if (response.code === 0) {
+          this.$Message.destroy()
           this.$Message.success('更改成功')
           this.getProduct()
         }
       }).catch(err => {
         console.log(err)
+        this.$Message.destroy()
         this.$Message.error('请求失败')
       })
     },
     // 增加产品信息
     addProduct () {
+      if (!this.add.name || !this.add.count) {
+        this.$Message.error('请完善信息')
+        return
+      }
+      if (typeof this.add.count !== 'number') {
+        this.$Message.error('请输入正确的数字')
+        this.add = { name: '', count: null }
+        return
+      }
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
       addProductApi(this.add).then(res => {
         let response = res.data
         if (response.code === 0) {
+          this.$Message.destroy()
           this.$Message.success('添加成功')
+          this.add = { name: '', count: null }
           this.getProduct()
         }
       }).catch(err => {
         console.log(err)
+        this.$Message.destroy()
         this.$Message.error('请求失败')
       })
     },
     changeChangeProductStatus (systemId, name, count) {
-      this.change.systemId = systemId
-      this.change.name = name
-      this.change.count = count
+      this.change = { systemId, name, count }
       this.changeShow = true
     },
     handleChangeProduct () {

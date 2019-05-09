@@ -2,7 +2,7 @@
     <div>
       <Row style="margin-bottom: 5px">
         搜索：
-        <Input v-model="searchEmployeeId" placeholder="请输入员工号" style="width: 150px;"/>&nbsp;
+        <Input v-model="searchEmployeeId" number placeholder="输入0查询全部" style="width: 150px;"/>&nbsp;
         <Button type="primary" @click="searchEmployeeById">查询</Button>
         <Button type="primary" @click="addShow = true" style="float: right">增加员工</Button>
       </Row>
@@ -36,7 +36,7 @@
         <Input v-model="add.comment" clearable style="width: 200px" />
       </Modal>
       <Divider>员工信息</Divider>
-      <Table :columns="columns1" :data="data1"></Table>
+      <Table :loading="tableLoading" :columns="columns1" :data="data1"></Table>
     </div>
 </template>
 
@@ -46,6 +46,7 @@ export default {
   name: 'staff-info',
   data () {
     return {
+      tableLoading: false,
       change: {
         id: Number,
         name: '',
@@ -59,7 +60,7 @@ export default {
         position: '',
         comment: ''
       },
-      searchEmployeeId: '',
+      searchEmployeeId: null,
       addShow: false,
       editShow: false,
       columns1: [
@@ -123,33 +124,59 @@ export default {
   },
   methods: {
     getEmployee () {
+      this.tableLoading = true
       getEmployeeApi(0).then(res => {
         if (res.data.code === 0) {
+          this.tableLoading = false
           this.data1 = res.data.data
         }
       }).catch(err => {
+        this.tableLoading = false
         this.$Message.error('请求失败')
         console.log(err)
       })
     },
     searchEmployeeById () {
-      if (!this.searchEmployeeId) {
-        this.$Message.warning('请输入要查询的编号')
+      if (this.searchEmployeeId === null) {
+        this.$Message.error('请输入要查询的编号！')
         return
       }
+      if (typeof this.searchEmployeeId !== 'number') {
+        this.$Message.error('请输入数字')
+        this.searchEmployeeId = null
+        return
+      }
+      this.tableLoading = true
       getEmployeeApi(this.searchEmployeeId).then(res => {
         if (res.data.code === 0) {
           this.data1 = res.data.data
+          this.tableLoading = false
         }
       }).catch(err => {
         this.$Message.error('请求失败')
+        this.tableLoading = false
         console.log(err)
       })
     },
     addEmployee () {
+      if (!this.add.name || !this.add.name || !this.add.sex || !this.add.position) {
+        this.$Message.error('请完善信息')
+        return
+      }
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
       addEmployeeApi(this.add).then(res => {
         if (res.data.code === 0) {
+          this.$Message.destroy()
           this.$Message.success('添加成功')
+          this.add = {
+            name: '',
+            sex: '',
+            position: '',
+            comment: ''
+          }
           this.getEmployee()
         }
       }).catch(err => {
@@ -158,23 +185,35 @@ export default {
       })
     },
     deleteEmployee (id) {
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
       deleteEmployeeApi(id).then(res => {
         if (res.data.code === 0) {
+          this.$Message.destroy()
           this.$Message.success('删除成功')
           this.getEmployee()
         }
       }).catch(err => {
         console.log(err)
+        this.$Message.destroy()
         this.$Message.error('请求失败')
       })
     },
     changeEmployee () {
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
       changeEmployeeApi(this.change).then(res => {
         if (res.data.code === 0) {
+          this.$Message.destroy()
           this.$Message.success('修改成功')
         }
       }).catch(err => {
         console.log(err)
+        this.$Message.destroy()
         this.$Message.error('请求失败')
       })
     },
