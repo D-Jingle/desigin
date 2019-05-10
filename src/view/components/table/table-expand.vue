@@ -2,7 +2,7 @@
   <div>
     <Col span="4" class="expand-row" v-for="(item,index) in row" :key="index">
       <span class="expand-key">{{ item.name }} : </span>
-      <span class="expand-value">{{ item.num }}</span>
+      <span class="expand-value">{{ item.count }}</span>
     </Col>
   </div>
 </template>

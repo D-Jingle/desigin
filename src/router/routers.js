@@ -120,9 +120,21 @@ export default [
         meta: {
           icon: 'ios-contact',
           title: '修改订单',
-          hideInMenu: true
+          hideInMenu: true,
+          notCache: true
         },
         component: () => import('@/view/delivery/order-detail.vue')
+      },
+      {
+        path: 'add_order',
+        name: 'add_order',
+        meta: {
+          icon: 'ios-contact',
+          title: '添加订单',
+          notCache: true,
+          hideInMenu: true
+        },
+        component: () => import('@/view/delivery/add-order.vue')
       }
     ]
   },

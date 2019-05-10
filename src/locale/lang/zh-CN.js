@@ -12,5 +12,6 @@ export default {
   account: '财务管理',
   collect_money: '收款登记',
   statistics: '统计',
-  order_detail: '修改订单'
+  order_detail: '修改订单',
+  add_order: '添加订单'
 }

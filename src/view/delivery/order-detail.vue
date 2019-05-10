@@ -5,9 +5,16 @@
         title="添加产品"
         @on-cancel="handleCancel"
         @on-ok="handleAdd">
-        <Select v-model="add.name" style="width:200px">
-          <Option v-for="(item, index) in goodsList" :value="item.name" :key="index">{{ item.name }}</Option>
-        </Select>
+        <Form :label-width="100">
+          <FormItem label="请选择产品：">
+            <Select v-model="add.systemId" style="width:200px"  @on-change="changeThingsSystemId">
+              <Option v-for="(item, index) in productList" :value="item.systemId" :key="index">{{ item.name }}</Option>
+            </Select>
+          </FormItem>
+          <FormItem v-if="add.change" label="请选择数量：">
+            <Slider v-model="add.count" :max="add.max" show-input></Slider>
+          </FormItem>
+        </Form>
       </Modal>
       <Card>
         <p slot="title">更改信息</p>
@@ -15,51 +22,51 @@
           <Col span="12">
             <Form :label-width="100">
               <FormItem label="订单号">
-                {{orderInfo.id}}
+                {{prepareList.orderInfo.systemId}}
               </FormItem>
               <FormItem label="客户">
-                <Select v-model="orderInfo.custom" style="width:150px" @on-change="handleChangeCustom">
-                  <Option v-for="item in customList" :value="item.custom" :key="item.id">{{ item.custom }}</Option>
+                <Select v-model="prepareList.orderInfo.clientId" style="width:150px">
+                  <Option v-for="item in prepareList.clientList" :value="item.systemId" :key="item.systemId">{{ item.name }}</Option>
                 </Select>
               </FormItem>
               <FormItem label="配送车辆">
-                <Select v-model="orderInfo.car" style="width:150px" @on-change="handleChangeCar">
-                  <Option v-for="item in carList" :value="item.car" :key="item.id">{{ item.car }}</Option>
+                <Select v-model="prepareList.orderInfo.carId" style="width:150px">
+                  <Option v-for="item in prepareList.carList" :value="item.systemId" :key="item.systemId">{{ item.number }}</Option>
                 </Select>
               </FormItem>
               <FormItem label="配送员">
-                <Select v-model="orderInfo.staff" style="width:150px" @on-change="handleChangeStaff">
-                  <Option v-for="item in staffList" :value="item.staff" :key="item.id">{{ item.staff }}</Option>
+                <Select v-model="prepareList.orderInfo.eId" style="width:150px">
+                  <Option v-for="item in prepareList.employeeList" :value="item.systemId" :key="item.systemId">{{ item.name }}</Option>
                 </Select>
               </FormItem>
               <FormItem label="配送时间">
                 <Row>
                   <Col span="11">
-                    <DatePicker :value="orderInfo.deliveryTime" @on-change="handleChangeDeliveryTime" type="date" placeholder="Select date" style="width: 200px"></DatePicker>
+                    <DatePicker :value="prepareList.orderInfo.start" type="date" placeholder="Select date" style="width: 200px"></DatePicker>
                   </Col>
                 </Row>
               </FormItem>
               <FormItem label="预计到达时间">
                 <Row>
                   <Col span="11">
-                    <DatePicker :value="orderInfo.arriveTime" @on-change="handleChangeArriveTime" type="date" placeholder="Select date" style="width: 200px"></DatePicker>
+                    <DatePicker :value="prepareList.orderInfo.end" type="date" placeholder="Select date" style="width: 200px"></DatePicker>
                   </Col>
                 </Row>
               </FormItem>
               <FormItem label="状态">
-                <RadioGroup v-model="orderInfo.status">
-                  <Radio label="配送中">配送中</Radio>
-                  <Radio label="待配送">待配送</Radio>
+                <RadioGroup v-model="prepareList.orderInfo.status">
+                  <Radio label=1>配送中</Radio>
+                  <Radio label=0>待配送</Radio>
                 </RadioGroup>
               </FormItem>
             </Form>
           </Col>
           <Col span="11" offset="1">
             <Form :label-width="100" label-position="left">
-              <Row v-for="(item, index) in orderInfo.goods" :key="index" style="margin-bottom: 5px;height: 2rem">
+              <Row v-for="(item, index) in prepareList.orderInfo.things" :key="index" style="margin-bottom: 5px;height: 2rem">
                 <FormItem :label="item.name">
                   <Col span="8" style="margin-right: 10px">
-                    <Input number clearable v-model="item.num"></Input>
+                    <Input number clearable v-model="item.count"></Input>
                   </Col>
                   <Button size="small" type="text" shape="circle" icon="md-close" style="color: red;" @click="handleRemove(index)"></Button>
                 </FormItem>
@@ -80,158 +87,93 @@
 </template>
 
 <script>
+import { getProductApi } from '../../api/product'
+import { changeDeliveryApi } from '@/api/delivery'
+
 export default {
   name: 'order-change',
   data () {
     return {
       add: {
+        systemId: 0,
         show: false,
         name: '',
-        num: ''
+        count: 0,
+        max: 0,
+        change: false
       },
-      orderInfo: null,
       type: '',
-      carList: [
-        {
-          id: 1,
-          car: '黑B12345'
-        },
-        {
-          id: 2,
-          car: '黑B12445'
-        },
-        {
-          id: 3,
-          car: '黑B12355'
-        },
-        {
-          id: 4,
-          car: '黑B42345'
-        }
-      ],
-      staffList: [
-        {
-          id: 1,
-          staff: '白素贞'
-        },
-        {
-          id: 2,
-          staff: '小青'
-        },
-        {
-          id: 3,
-          staff: '法海'
-        },
-        {
-          id: 4,
-          staff: '许仙'
-        }
-      ],
-      statusList: [
-        {
-          id: 1,
-          status: '配送中'
-        },
-        {
-          id: 2,
-          status: '待配送'
-        }
-      ],
-      customList: [
-        {
-          id: '1',
-          custom: '东北林业大学'
-        },
-        {
-          id: '2',
-          custom: '东北农业大学'
-        },
-        {
-          id: '3',
-          custom: '哈尔滨工业大学'
-        },
-        {
-          id: '4',
-          custom: '黑龙江大学'
-        }
-      ],
-      goodsList: [
-        {
-          id: 0,
-          name: '碗',
-          num: '1000'
-        },
-        {
-          id: 1,
-          name: '杯子',
-          num: '1200'
-        },
-        {
-          id: 2,
-          name: '勺',
-          num: '1500'
-        },
-        {
-          id: 3,
-          name: '盘子',
-          num: '1000'
-        },
-        {
-          id: 4,
-          name: '筷子',
-          num: '800'
-        }
-      ]
+      prepareList: null,
+      productList: []
     }
   },
   created () {
     if (!this.$route.params.orderInfo) {
       this.$router.go(-1)
     }
-    this.orderInfo = this.$route.params.orderInfo
-    this.type = this.$route.params.type
+    this.prepareList = { ...this.$route.params }
+    console.log(this.prepareList)
+    this.getProduct()
   },
   methods: {
-    handleChangeCustom (custom) {
-    },
-    changeOrderStatus (status) {
-    },
-    handleChangeDeliveryTime (time) {
-      this.orderInfo.deliveryTime = time
-      console.log(this.orderInfo.deliveryTime)
-    },
-    handleChangeArriveTime (time) {
-      this.orderInfo.arriveTime = time
-      console.log(this.orderInfo.arriveTime)
-    },
-    handleEditOrder () {
-      this.$Message.success('更改成功')
-    },
-    handleChangeCar (car) {
-    },
-    handleChangeStaff (staff) {
+    getProduct () {
+      getProductApi(0).then(res => {
+        if (res.data.code === 0) {
+          this.productList = res.data.data
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.error('请求失败')
+      })
     },
     changeAddShow () {
-      this.add.show = true
+      this.add.change = false
+      this.add = {
+        systemId: 0,
+        show: true,
+        name: '',
+        count: 0,
+        max: 0,
+        change: false
+      }
     },
     handleCancel () {
       this.add.name = ''
+      this.add.change = false
     },
     handleAdd () {
-      if (this.add.name === '') {
+      if (this.add.systemId === 0) {
         this.$Message.error('请选择产品！')
       } else {
-        this.orderInfo.goods.push({
+        this.prepareList.orderInfo.things.push({
+          systemId: this.add.systemId,
           name: this.add.name,
-          num: 0
+          count: this.add.count
         })
-        this.add.name = ''
       }
+      this.add.change = false
     },
     handleRemove (index) {
-      this.orderInfo.goods.splice(index, 1)
+      this.prepareList.orderInfo.things.splice(index, 1)
     },
     handleSubmit () {
+      changeDeliveryApi(this.prepareList.orderInfo).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.success('修改成功')
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.error('操作失败')
+      })
+    },
+    changeThingsSystemId () {
+      this.add.change = true
+      for (let i = 0; i < this.productList.length; i++) {
+        if (this.productList[i].systemId === this.add.systemId) {
+          this.add.max = Number(this.productList[i].count)
+          this.add.name = this.productList[i].name
+        }
+      }
     }
   }
 }

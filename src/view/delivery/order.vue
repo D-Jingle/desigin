@@ -2,176 +2,47 @@
   <div>
     <Row style="margin-bottom: 5px">
       搜索订单号：
-      <Input v-model="searchOrderId" placeholder="请输入订单号" style="width: 150px;"/>&nbsp;
-      <Button type="primary">查询</Button>
+      <Input v-model="searchOrderId" number placeholder="请输入订单号" style="width: 150px;"/>&nbsp;
+      <Button @click="getDeliveryById" type="primary">查询</Button>
     </Row>
     <Row style="margin-bottom: 5px">
       搜索配送员：
-      <Input v-model="searchStaff" placeholder="请输入配送员编号" style="width: 150px;"/>&nbsp;
-      <Button type="primary">查询</Button>
-      <Button type="primary" @click="addShow = true" style="float: right">增加订单</Button>
+      <Input v-model="searchStaff" number placeholder="请输入配送员编号" style="width: 150px;"/>&nbsp;
+      <Button type="primary" @click="getDeliveryByEmployeeId">查询</Button>
+      <Button type="primary" style="float: right" @click="handleAddOrder">增加订单</Button>
     </Row>
-    <!--<Modal v-model="editShow"-->
-           <!--title="修改订单"-->
-           <!--@on-ok="handleEditOrder">-->
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>客户：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<Select v-model="edit.custom" style="width:150px">-->
-            <!--<Option v-for="item in customList" :value="item.custom" :key="item.id">{{ item.custom }}</Option>-->
-          <!--</Select>-->
-        <!--</Col>-->
-      <!--</Row>-->
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>派送时间：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<DatePicker :value="edit.deliveryTime" @on-change="handleChangeEditDeliveryTime" type="date" placeholder="Select date" style="width: 200px"></DatePicker>-->
-        <!--</Col>-->
-      <!--</Row>-->
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>预计到达时间：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<DatePicker :value="edit.arriveTime" type="date" placeholder="Select date" style="width: 200px"></DatePicker>-->
-        <!--</Col>-->
-      <!--</Row>-->
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>配送车辆：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<Select v-model="edit.car" style="width:150px">-->
-            <!--<Option v-for="item in carList" :value="edit.car" :key="item.id">{{ item.car }}</Option>-->
-          <!--</Select>-->
-        <!--</Col>-->
-      <!--</Row>-->
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>配送员：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<Select v-model="edit.staff" style="width:150px">-->
-            <!--<Option v-for="item in staffList" :value="item.name" :key="item.id">{{ item.name }}</Option>-->
-          <!--</Select>-->
-        <!--</Col>-->
-      <!--</Row>-->
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>配送状态：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<Select v-model="edit.status" style="width:150px">-->
-            <!--<Option v-for="item in statusList" :value="edit.status" :key="item.id">{{ item.status }}</Option>-->
-          <!--</Select>-->
-        <!--</Col>-->
-      <!--</Row>-->
-    <!--</Modal>-->
-    <!--<Modal v-model="addShow"-->
-           <!--title="增加订单"-->
-           <!--@on-ok="handleAddOrder">-->
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>客户：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<Select v-model="add.custom" style="width:150px">-->
-            <!--<Option v-for="item in customList" :value="item.custom" :key="item.id">{{ item.custom }}</Option>-->
-          <!--</Select>-->
-        <!--</Col>-->
-      <!--</Row>-->
-
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>派送时间：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<DatePicker type="date" placeholder="Select date" style="width: 200px"></DatePicker>-->
-        <!--</Col>-->
-      <!--</Row>-->
-
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>预计到达时间：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<DatePicker type="date" placeholder="Select date" style="width: 200px"></DatePicker>-->
-        <!--</Col>-->
-      <!--</Row>-->
-
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>配送车辆：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<Select v-model="add.car" style="width:150px">-->
-            <!--<Option v-for="item in carList" :value="item.car" :key="item.id">{{ item.car }}</Option>-->
-          <!--</Select>-->
-        <!--</Col>-->
-      <!--</Row>-->
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>配送员：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<Select v-model="add.staff" style="width:100px">-->
-            <!--<Option v-for="item in staffList" :value="item.name" :key="item.id">{{ item.name }}</Option>-->
-          <!--</Select>-->
-        <!--</Col>-->
-      <!--</Row>-->
-      <!--<Row style="margin-bottom: 5px">-->
-        <!--<Col span="5">-->
-          <!--<span>配送状态：</span>-->
-        <!--</Col>-->
-        <!--<Col span="19">-->
-          <!--<Select v-model="add.status" style="width:150px">-->
-            <!--<Option v-for="item in statusList" :value="item.status" :key="item.id">{{ item.status }}</Option>-->
-          <!--</Select>-->
-        <!--</Col>-->
-      <!--</Row>-->
-    <!--</Modal>-->
-
     <Divider>订单信息</Divider>
-    <Table :columns="columns1" :data="data1"></Table>
+    <Table :loading="tableLoading" :columns="columns1" :data="data1"></Table>
   </div>
 </template>
 
 <script>
 import expandRow from '../components/table/table-expand.vue'
-import { cloneObj } from '@/libs/tools.js'
+import { getDeliveryApi, addDeliveryApi, deleteDeliveryApi, getDeliveryByEmployeeIdApi } from '@/api/delivery'
+import { getCarApi } from '../../api/car'
+import { getClientApi } from '../../api/custom'
+import { getEmployeeApi } from '../../api/staff'
+
 export default {
   name: 'order',
   components: { expandRow },
   data () {
     return {
+      tableLoading: false,
       searchOrderId: null,
       searchStaff: null,
-      editShow: false,
       edit: {
-        id: null,
+        systemId: null,
         show: false,
-        custom: '',
-        deliveryTime: '',
-        arriveTime: '',
+        clientName: '',
+        start: '',
+        end: '',
         status: '',
-        staff: '',
-        car: ''
+        employeeName: '',
+        car: '',
+        things: []
       },
       addShow: false,
-      add: {
-        id: null,
-        show: false,
-        custom: '点击选择',
-        deliveryTime: '',
-        arriveTime: '',
-        status: '',
-        staff: '',
-        car: ''
-      },
       columns1: [
         {
           type: 'expand',
@@ -179,38 +50,81 @@ export default {
           render: (h, params) => {
             return h(expandRow, {
               props: {
-                row: params.row.goods
+                row: params.row.things
               }
             })
           }
         },
         {
           title: '订单号',
-          key: 'id'
+          key: 'systemId'
         },
         {
           title: '客户',
-          key: 'custom'
+          key: 'clientId',
+          width: '150',
+          render: (h, params) => {
+            for (let i = 0; i < this.clientNameList.length; i++) {
+              if (this.clientNameList[i].systemId === params.row.clientId) {
+                return h('span', {
+                  domProps: {
+                    innerText: this.clientNameList[i].name
+                  }
+                })
+              }
+            }
+          }
         },
         {
           title: '派送时间',
-          key: 'deliveryTime'
+          key: 'start'
         },
         {
           title: '预计到达时间',
-          key: 'arriveTime'
+          key: 'end'
         },
         {
           title: '订单状态',
-          key: 'status'
+          key: 'status',
+          render: (h, params) => {
+            let statusText
+            params.row.status === 0 ? statusText = '待配送' : statusText = '配送中'
+            return h('span', {
+              domProps: {
+                innerText: statusText
+              }
+            })
+          }
         },
         {
           title: '配送车辆',
-          key: 'car'
+          key: 'carNumber',
+          render: (h, params) => {
+            return h('span', this.carNumberList.map(function (item, index) {
+              if (item.systemId === params.row.carId) {
+                return h('span', {
+                  domProps: {
+                    innerText: item.name
+                  }
+                })
+              }
+            }))
+          }
         },
         {
           title: '配送员',
-          key: 'staff'
+          key: 'eId',
+          render: (h, params) => {
+            return h('span', this.employeeList.map(function (item, index) {
+              if (item.systemId === params.row.eId) {
+                return h('span', {
+                  domProps: {
+                    innerText: item.name
+                  }
+                })
+              }
+            }))
+          }
         },
         {
           title: '操作',
@@ -222,7 +136,7 @@ export default {
                 },
                 on: {
                   click: () => {
-                    this.handleDeleteOrder()
+                    this.handleDeleteOrder(params.row.systemId)
                   }
                 }
               }),
@@ -236,12 +150,14 @@ export default {
                 on: {
                   click: () => {
                     let orderInfo = params.row
-                    // this.changeEditOrderStatus(params.row)
+                    orderInfo.status = orderInfo.status.toString()
                     this.$router.push({
                       name: 'order_detail',
                       params: {
                         orderInfo: JSON.parse(JSON.stringify(orderInfo)),
-                        type: 'change'
+                        carList: this.carNumberList,
+                        employeeList: this.employeeList,
+                        clientList: this.clientNameList
                       }
                     })
                   }
@@ -251,178 +167,163 @@ export default {
           }
         }
       ],
-      data1: [
-        {
-          id: '0001',
-          custom: '东北林业大学',
-          deliveryTime: '2019-01-01',
-          arriveTime: '2019-01-02',
-          status: '配送中',
-          car: '黑B12345',
-          staff: '白素贞',
-          goods: [
-            {
-              name: '碗',
-              num: '1000'
-            },
-            {
-              name: '杯子',
-              num: '1200'
-            },
-            {
-              name: '勺',
-              num: '1500'
-            }
-          ]
-        },
-        {
-          id: '0002',
-          custom: '东北农业大学',
-          deliveryTime: '2019-04-04',
-          arriveTime: '2019-04-04',
-          status: '待配送',
-          car: '黑B12445',
-          staff: '小青',
-          goods: [
-            {
-              name: '盘子',
-              num: '1000'
-            },
-            {
-              name: '筷子',
-              num: '800'
-            }
-          ]
-        },
-        {
-          id: '0003',
-          custom: '东北林业大学',
-          deliveryTime: '2019-01-01',
-          arriveTime: '2019-01-02',
-          status: '配送中',
-          car: '黑B12355',
-          staff: '法海',
-          goods: [
-            {
-              name: '碗',
-              num: '1000'
-            },
-            {
-              name: '筷子',
-              num: '800'
-            }
-          ]
-        },
-        {
-          id: '0004',
-          custom: '哈尔滨工程',
-          deliveryTime: '2019-01-08',
-          arriveTime: '2019-01-10',
-          status: '待配送',
-          car: '黑B42345',
-          staff: '许仙',
-          goods: [
-            {
-              name: '盘子',
-              num: '1000'
-            },
-            {
-              name: '筷子',
-              num: '800'
-            }
-          ]
-        }
-      ],
-      customList: [
-        {
-          id: '1',
-          custom: '东北林业大学'
-        },
-        {
-          id: '2',
-          custom: '东北农业大学'
-        },
-        {
-          id: '3',
-          custom: '哈尔滨工业大学'
-        },
-        {
-          id: '4',
-          custom: '黑龙江大学'
-        }
-      ],
-      carList: [
-        {
-          id: 1,
-          car: '黑B12345'
-        },
-        {
-          id: 2,
-          car: '黑B12445'
-        },
-        {
-          id: 3,
-          car: '黑B12355'
-        },
-        {
-          id: 4,
-          car: '黑B42345'
-        }
-      ],
-      staffList: [
-        {
-          id: 1,
-          name: '白素贞'
-        },
-        {
-          id: 2,
-          name: '小青'
-        },
-        {
-          id: 3,
-          name: '法海'
-        },
-        {
-          id: 4,
-          name: '许仙'
-        }
-      ],
-      statusList: [
-        {
-          id: 1,
-          status: '派送中'
-        },
-        {
-          id: 2,
-          status: '待派送'
-        }
-      ]
+      data1: [],
+      clientNameList: [],
+      carNumberList: [],
+      employeeList: []
     }
   },
+  created () {
+    this.tableLoading = true
+    this.getCar()
+  },
   methods: {
-    handleChangeEditDeliveryTime (data) {
-      console.log(data)
-      this.edit.deliveryTime = data
+    getDelivery () {
+      this.tableLoading = true
+      getDeliveryApi(0).then(res => {
+        if (res.data.code === 0) {
+          this.data1 = res.data.data
+          this.tableLoading = false
+        }
+      }).catch(err => {
+        console.log(err)
+        this.tableLoading = false
+        this.$Message.error('请求失败')
+      })
     },
-    changeEditOrderStatus (data) {
-      console.log(data)
-      this.edit = cloneObj(data)
-      this.editShow = true
+    getDeliveryById () {
+      if (this.searchOrderId === null) {
+        this.$Message.error('请输入要查询的编号！')
+        return
+      }
+      if (typeof this.searchOrderId !== 'number') {
+        this.$Message.error('请输入数字')
+        this.searchOrderId = null
+        return
+      }
+      this.tableLoading = true
+      getDeliveryApi(this.searchOrderId).then(res => {
+        if (res.data.code === 0) {
+          this.data1 = res.data.data
+          this.tableLoading = false
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.error('请求失败')
+        this.tableLoading = false
+      })
     },
-    handleEditOrder () {
-      this.$Message.success('更改成功')
+    getDeliveryByEmployeeId () {
+      if (this.searchStaff === null) {
+        this.$Message.error('请输入要查询的编号！')
+        return
+      }
+      if (typeof this.searchStaff !== 'number') {
+        this.$Message.error('请输入数字')
+        this.searchStaff = null
+        return
+      }
+      this.tableLoading = true
+      getDeliveryByEmployeeIdApi(this.searchStaff).then(res => {
+        if (res.data.code === 0) {
+          this.data1 = res.data.data
+          this.tableLoading = false
+          this.searchStaff = null
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.error('请求失败')
+        this.tableLoading = false
+      })
     },
-    handleDeleteOrder () {
+    deleteDelivery (systemId) {
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
+      deleteDeliveryApi(systemId).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.destroy()
+          this.$Message.success('删除成功')
+          this.getDelivery()
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.destroy()
+        this.$Message.error('请求失败')
+      })
+    },
+    getClientApi () {
+      getClientApi(0).then(res => {
+        if (res.data.code === 0) {
+          this.clientNameList = res.data.data
+        }
+        this.getEmployee()
+      }).catch(err => {
+        console.log(err)
+        this.$Message.error('请求失败')
+      })
+    },
+    getEmployee () {
+      getEmployeeApi(0).then(res => {
+        if (res.data.code === 0) {
+          this.employeeList = res.data.data
+        }
+        this.getDelivery()
+      }).catch(err => {
+        this.$Message.error('请求失败')
+        console.log(err)
+      })
+    },
+    getCar () {
+      getCarApi(0).then(res => {
+        if (res.data.code === 0) {
+          this.carNumberList = res.data.data
+        }
+        this.getClientApi()
+      }).catch(err => {
+        this.$Message.error('请求失败')
+        console.log(err)
+      })
+    },
+    addDelivery () {
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
+      addDeliveryApi(this.add).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.destroy()
+          this.$Message.success('添加成功')
+          this.getDelivery()
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.destroy()
+        this.$Message.error('请求失败')
+      })
+    },
+    handleDeleteOrder (systemId) {
       this.$Modal.confirm({
         title: '提示',
         content: '确定删除?',
         onOk: () => {
-          this.$Message.success('删除成功')
+          this.deleteDelivery(systemId)
         }
       })
     },
     handleAddOrder () {
-      this.$Message.success('添加成功')
+      let carList = this.carNumberList
+      let clientList = this.clientNameList
+      let employeeList = this.employeeList
+      this.$router.push({
+        name: 'add_order',
+        params: {
+          carList,
+          clientList,
+          employeeList
+        }
+      })
     }
   }
 }

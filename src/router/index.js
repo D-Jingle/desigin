@@ -21,7 +21,7 @@ const router = new Router({
 // }
 
 router.beforeEach((to, from, next) => {
-  iView.LoadingBar.start()
+  // iView.LoadingBar.start()
   // const token = getToken()
   next()
   // if (!token && to.name !== LOGIN_PAGE_NAME) {
