@@ -22,39 +22,39 @@
           <Col span="12">
             <Form :label-width="100">
               <FormItem label="订单号">
-                {{prepareList.orderInfo.systemId}}
+                {{orderInfo.systemId}}
               </FormItem>
               <FormItem label="客户">
-                <Select v-model="prepareList.orderInfo.clientId" style="width:150px">
-                  <Option v-for="item in prepareList.clientList" :value="item.systemId" :key="item.systemId">{{ item.name }}</Option>
+                <Select v-model="orderInfo.clientId" style="width:150px">
+                  <Option v-for="item in clientList" :value="item.systemId" :key="item.systemId">{{ item.name }}</Option>
                 </Select>
               </FormItem>
               <FormItem label="配送车辆">
-                <Select v-model="prepareList.orderInfo.carId" style="width:150px">
-                  <Option v-for="item in prepareList.carList" :value="item.systemId" :key="item.systemId">{{ item.number }}</Option>
+                <Select v-model="orderInfo.carId" style="width:150px">
+                  <Option v-for="item in carList" :value="item.systemId" :key="item.systemId">{{ item.number }}</Option>
                 </Select>
               </FormItem>
               <FormItem label="配送员">
-                <Select v-model="prepareList.orderInfo.eId" style="width:150px">
-                  <Option v-for="item in prepareList.employeeList" :value="item.systemId" :key="item.systemId">{{ item.name }}</Option>
+                <Select v-model="orderInfo.eId" style="width:150px">
+                  <Option v-for="item in employeeList" :value="item.systemId" :key="item.systemId">{{ item.name }}</Option>
                 </Select>
               </FormItem>
               <FormItem label="配送时间">
                 <Row>
                   <Col span="11">
-                    <DatePicker :value="prepareList.orderInfo.start" type="date" placeholder="Select date" style="width: 200px"></DatePicker>
+                    <DatePicker :value="orderInfo.start" type="date" placeholder="Select date" style="width: 200px"></DatePicker>
                   </Col>
                 </Row>
               </FormItem>
               <FormItem label="预计到达时间">
                 <Row>
                   <Col span="11">
-                    <DatePicker :value="prepareList.orderInfo.end" type="date" placeholder="Select date" style="width: 200px"></DatePicker>
+                    <DatePicker :value="orderInfo.end" type="date" placeholder="Select date" style="width: 200px"></DatePicker>
                   </Col>
                 </Row>
               </FormItem>
               <FormItem label="状态">
-                <RadioGroup v-model="prepareList.orderInfo.status">
+                <RadioGroup v-model="orderInfo.status">
                   <Radio label=1>配送中</Radio>
                   <Radio label=0>待配送</Radio>
                 </RadioGroup>
@@ -63,7 +63,7 @@
           </Col>
           <Col span="11" offset="1">
             <Form :label-width="100" label-position="left">
-              <Row v-for="(item, index) in prepareList.orderInfo.things" :key="index" style="margin-bottom: 5px;height: 2rem">
+              <Row v-for="(item, index) in orderInfo.things" :key="index" style="margin-bottom: 5px;height: 2rem">
                 <FormItem :label="item.name">
                   <Col span="8" style="margin-right: 10px">
                     <Input number clearable v-model="item.count"></Input>
@@ -103,16 +103,10 @@ export default {
         change: false
       },
       type: '',
-      prepareList: null,
       productList: []
     }
   },
   created () {
-    if (!this.$route.params.orderInfo) {
-      this.$router.go(-1)
-    }
-    this.prepareList = { ...this.$route.params }
-    console.log(this.prepareList)
     this.getProduct()
   },
   methods: {
@@ -145,7 +139,7 @@ export default {
       if (this.add.systemId === 0) {
         this.$Message.error('请选择产品！')
       } else {
-        this.prepareList.orderInfo.things.push({
+        this.orderInfo.things.push({
           systemId: this.add.systemId,
           name: this.add.name,
           count: this.add.count
@@ -154,10 +148,10 @@ export default {
       this.add.change = false
     },
     handleRemove (index) {
-      this.prepareList.orderInfo.things.splice(index, 1)
+      this.orderInfo.things.splice(index, 1)
     },
     handleSubmit () {
-      changeDeliveryApi(this.prepareList.orderInfo).then(res => {
+      changeDeliveryApi(this.orderInfo).then(res => {
         if (res.data.code === 0) {
           this.$Message.success('修改成功')
         }

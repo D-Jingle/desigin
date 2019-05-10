@@ -13,21 +13,30 @@
     </Row>
     <Divider>订单信息</Divider>
     <Table :loading="tableLoading" :columns="columns1" :data="data1"></Table>
+    <div v-if="addShow">
+      <AddOrder @handleChildCancel="handleChildCancel" @handleChildOk="handleChildOk" :carList="carNumberList" :clientList="clientNameList" :employeeList="employeeList"></AddOrder>
+    </div>
+    <div v-if="changeShow">
+      <ChangeOrder @handleChildCancel="handleChild2Cancel" @handleChildOk="handleChild2Ok" :orderInfo="orderInfo" :carList="carNumberList" :employeeList="employeeList" :clientList="clientNameList"></ChangeOrder>
+    </div>
   </div>
 </template>
 
 <script>
 import expandRow from '../components/table/table-expand.vue'
-import { getDeliveryApi, addDeliveryApi, deleteDeliveryApi, getDeliveryByEmployeeIdApi } from '@/api/delivery'
+import AddOrder from '../components/order/add-order'
+import ChangeOrder from '../components/order/change-order'
+import { changeDeliveryApi, getDeliveryApi, addDeliveryApi, deleteDeliveryApi, getDeliveryByEmployeeIdApi } from '@/api/delivery'
 import { getCarApi } from '../../api/car'
 import { getClientApi } from '../../api/custom'
 import { getEmployeeApi } from '../../api/staff'
 
 export default {
   name: 'order',
-  components: { expandRow },
+  components: { expandRow, AddOrder, ChangeOrder },
   data () {
     return {
+      changeShow: false,
       tableLoading: false,
       searchOrderId: null,
       searchStaff: null,
@@ -43,6 +52,7 @@ export default {
         things: []
       },
       addShow: false,
+      orderInfo: null,
       columns1: [
         {
           type: 'expand',
@@ -149,17 +159,9 @@ export default {
                 },
                 on: {
                   click: () => {
-                    let orderInfo = params.row
-                    orderInfo.status = orderInfo.status.toString()
-                    this.$router.push({
-                      name: 'order_detail',
-                      params: {
-                        orderInfo: JSON.parse(JSON.stringify(orderInfo)),
-                        carList: this.carNumberList,
-                        employeeList: this.employeeList,
-                        clientList: this.clientNameList
-                      }
-                    })
+                    this.orderInfo = params.row
+                    this.orderInfo.status = this.orderInfo.status.toString()
+                    this.changeShow = true
                   }
                 }
               })
@@ -313,16 +315,45 @@ export default {
       })
     },
     handleAddOrder () {
-      let carList = this.carNumberList
-      let clientList = this.clientNameList
-      let employeeList = this.employeeList
-      this.$router.push({
-        name: 'add_order',
-        params: {
-          carList,
-          clientList,
-          employeeList
+      this.addShow = true
+    },
+    handleChildCancel () {
+      this.addShow = false
+    },
+    handleChildOk (add) {
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
+      addDeliveryApi(add).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.destroy()
+          this.$Message.success('添加成功')
+          this.getDelivery()
         }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.destroy()
+        this.$Message.error('请求失败')
+      })
+    },
+    handleChild2Cancel () {
+      this.changeShow = false
+    },
+    handleChild2Ok (change) {
+      this.$Message.loading({
+        content: '加载中...',
+        duration: 0
+      })
+      changeDeliveryApi(change).then(res => {
+        if (res.data.code === 0) {
+          this.$Message.destroy()
+          this.$Message.success('修改成功')
+        }
+      }).catch(err => {
+        console.log(err)
+        this.$Message.destroy()
+        this.$Message.error('操作失败')
       })
     }
   }
