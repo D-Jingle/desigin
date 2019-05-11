@@ -2,7 +2,6 @@
   <div>
     <Card>
       <p slot="title">本公司信息</p>
-      <Button slot="extra" type="primary" size="small">编辑信息</Button>
       <Row>
         <Col span="3">
           <strong>公司名称：</strong>

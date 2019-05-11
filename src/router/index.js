@@ -11,7 +11,8 @@ import { setTitle } from '@/libs/util'
 Vue.use(Router)
 const router = new Router({
   routes,
-  mode: 'history'
+  mode: 'hash',
+  base: '/Tableware/'
 })
 // const LOGIN_PAGE_NAME = 'login'
 //
